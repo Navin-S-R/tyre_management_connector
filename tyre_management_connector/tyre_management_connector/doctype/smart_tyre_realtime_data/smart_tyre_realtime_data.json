@@ -1,0 +1,86 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2023-10-09 19:31:03.046995",
+ "default_view": "List",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "device_id",
+  "device_date_time",
+  "erp_time_stamp",
+  "col_break1",
+  "ref_doctype",
+  "vehicle_no",
+  "section_break_weyih",
+  "overall_response"
+ ],
+ "fields": [
+  {
+   "fieldname": "device_id",
+   "fieldtype": "Data",
+   "label": "Device ID"
+  },
+  {
+   "fieldname": "device_date_time",
+   "fieldtype": "Datetime",
+   "label": "Device Date Time"
+  },
+  {
+   "fieldname": "erp_time_stamp",
+   "fieldtype": "Datetime",
+   "label": "Erp Time Stamp"
+  },
+  {
+   "fieldname": "col_break1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "ref_doctype",
+   "fieldtype": "Link",
+   "label": "Ref Doctype",
+   "options": "DocType"
+  },
+  {
+   "fieldname": "vehicle_no",
+   "fieldtype": "Dynamic Link",
+   "label": "Vehicle No",
+   "options": "ref_doctype"
+  },
+  {
+   "fieldname": "section_break_weyih",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "overall_response",
+   "fieldtype": "Code",
+   "label": "Overall response"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "is_virtual": 1,
+ "links": [],
+ "modified": "2023-10-09 19:32:28.563457",
+ "modified_by": "Administrator",
+ "module": "Tyre Management Connector",
+ "name": "Smart Tyre Realtime Data",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
