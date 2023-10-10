@@ -11,7 +11,6 @@
   "device_date_time",
   "erp_time_stamp",
   "col_break1",
-  "ref_doctype",
   "vehicle_no",
   "section_break_weyih",
   "overall_response"
@@ -37,16 +36,9 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "ref_doctype",
-   "fieldtype": "Link",
-   "label": "Ref Doctype",
-   "options": "DocType"
-  },
-  {
    "fieldname": "vehicle_no",
-   "fieldtype": "Dynamic Link",
-   "label": "Vehicle No",
-   "options": "ref_doctype"
+   "fieldtype": "Data",
+   "label": "Vehicle No"
   },
   {
    "fieldname": "section_break_weyih",
@@ -61,7 +53,7 @@
  "index_web_pages_for_search": 1,
  "is_virtual": 1,
  "links": [],
- "modified": "2023-10-09 19:32:28.563457",
+ "modified": "2023-10-09 23:05:01.565952",
  "modified_by": "Administrator",
  "module": "Tyre Management Connector",
  "name": "Smart Tyre Realtime Data",
