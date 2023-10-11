@@ -17,3 +17,13 @@ class MongoDBConnector(Document):
 			frappe.throw(f"Connection failed with error: {str(e)}")
 		finally:
 			client.close()
+
+
+def delete_data_in_collection(collection_name):
+	from pymongo import MongoClient
+	mongo_uri = frappe.db.get_single_value("MongoDB Connector", "url")
+	client = MongoClient(mongo_uri)
+	db = client.get_database()
+	collection = db[collection_name]
+	collection.delete_many({})
+	client.close()
