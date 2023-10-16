@@ -41,7 +41,6 @@ class SmartTyreRealtimeData(Document):
 
 @frappe.whitelist()
 def pull_realtime_data(**args):
-	frappe.log_error(message = args, title = "JK Realtime data")
 	if isinstance(args, str):
 		args = json.loads(args)
 	frappe.get_doc({
@@ -127,9 +126,7 @@ def get_smart_tyre_data_bulk(filters=None):
 	cursor = collection.aggregate(pipeline)
 	results = list(cursor)
 	client_server.close()
-	final_data=[]
+	final_data={}
 	for result in results:
-		data={}
-		data[result.get('_id')] = json.loads(result.get('latest_data').get('overall_response'))
-		final_data.append(data)
+		final_data[result.get('_id')] = json.loads(result.get('latest_data').get('overall_response'))
 	return final_data

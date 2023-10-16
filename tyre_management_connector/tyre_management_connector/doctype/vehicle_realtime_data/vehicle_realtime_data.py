@@ -31,7 +31,7 @@ class VehicleRealtimeData(Document):
 import frappe
 @frappe.whitelist()
 def pull_realtime_data(**args):
-	frappe.log_error(message = args, title = "Intangles Realtime Data")
+#	frappe.log_error(message = args, title = "Intangles Realtime Data")
 	if isinstance(args, str):
 		args = json.loads(args)
 	frappe.get_doc({
