@@ -1,6 +1,6 @@
 # Copyright (c) 2023, Aerele and contributors
 # For license information, please see license.txt
-
+import copy
 import requests
 import frappe
 import json
@@ -134,30 +134,38 @@ def get_smart_tyre_data_bulk(filters=None):
 	if vehicles:
 		final_data={}
 		url = "https://desk.lnder.in/api/method/tyre_management.tyre_management.doctype.vehicle_tire_position.vehicle_tire_position.get_vehicle_tyre_positions"
-		body = {
-			"vehicles":vehicles
+
+		payload = json.dumps({"vehicles": [vehicles]})
+		headers = {
+			'Authorization': 'token 5d86d079564a18a:80e46996b1b9eaf',
+			'Content-Type': 'application/json'
 		}
-		headers = {"Authorization":"token 5d86d079564a18a:80e46996b1b9eaf"}
-		response = requests.post(
-			url = url,
-			json = body,
-			headers = headers
-		)
+		response = requests.request("GET", url, headers=headers, data=payload)
 		if response.ok:
-			response=response.json()
+			response=response.json().get('message')
 			for result in results:
 				if response.get(result.get('_id')):
-					final_data[result.get('_id')]={}
 					smart_tyre_data = json.loads(result.get('latest_data').get('overall_response'))
-					for idx,data in enumerate(response.get(result.get('_id'))):
-						final_data[result.get('_id')]={
-							"tyre_position"+str(idx) : list(data.keys())[0],
-							"tyre_serial_no"+str(idx) : list(data.values())[0],
-						}
-						fields = ["Pres_","Temp_","Bat_","Event_"]
-						for field in fields:
-							final_data[result.get('_id')][field+str(idx)] = smart_tyre_data.get(field+str(idx))
-
+					for idx,key in enumerate(response.get(result.get('_id'))):
+						if (final_data.get(result.get('_id'))):
+							final_data_add={
+							"tyre_position": key,
+							"tyre_serial_no": response.get(result.get('_id')).get(key),
+							"Pres":smart_tyre_data.get("Pres_"+str(idx)),
+							"Temp":smart_tyre_data.get("Temp_"+str(idx)),
+							"Bat":smart_tyre_data.get("Bat_"+str(idx)),
+							"Event":smart_tyre_data.get("Event_"+str(idx))
+							}
+							final_data[result.get('_id')].append(final_data_add)
+						else:
+							final_data[result.get('_id')]=[{
+							"tyre_position": key,
+							"tyre_serial_no": response.get(result.get('_id')).get(key),
+							"Pres":smart_tyre_data.get("Pres_"+str(idx)),
+							"Temp":smart_tyre_data.get("Temp_"+str(idx)),
+							"Bat":smart_tyre_data.get("Bat_"+str(idx)),
+							"Event":smart_tyre_data.get("Event_"+str(idx))
+						}]
 			return final_data
 		else:
 			return response.raise_for_status()
