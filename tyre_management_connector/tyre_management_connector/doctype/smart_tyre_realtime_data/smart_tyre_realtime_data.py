@@ -43,12 +43,14 @@ class SmartTyreRealtimeData(Document):
 def pull_realtime_data(**args):
 	if isinstance(args, str):
 		args = json.loads(args)
+	erp_time_stamp = frappe.utils.now()
+	args['erp_time_stamp']=erp_time_stamp
 	frappe.get_doc({
 		"doctype" : "Smart Tyre Realtime Data",
 		"device_id" : args.get('DeviceId'),
 		"device_date_time" : args.get('DeviceDateTime'),
 		"vehicle_no" : args.get('vehicleNo'),
-		"erp_time_stamp" : frappe.utils.now(),
+		"erp_time_stamp" : erp_time_stamp,
 		"overall_response" : json.dumps(args,indent=4)
 	}).insert(ignore_permissions=True)
 	return {"response" : "Success"}
