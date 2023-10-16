@@ -46,11 +46,12 @@ def pull_realtime_data(**args):
 	if isinstance(args, str):
 		args = json.loads(args)
 	erp_time_stamp = frappe.utils.now()
+	args.pop('cmd')
 	args['erp_time_stamp']=erp_time_stamp
 	frappe.get_doc({
 				"doctype" : "Vehicle Realtime Data",
 				"device_id" : args.get('device_id'),
-				"vehicle_id" : args.get('vehicle_id'),
+				"vehicle_no" : args.get('vehicle_id'),
 				"erp_time_stamp" : erp_time_stamp,
 				"overall_response" : json.dumps(args,indent=4)
 	}).insert(ignore_permissions=True)

@@ -1,6 +1,7 @@
 # Copyright (c) 2023, Aerele and contributors
 # For license information, please see license.txt
 
+import requests
 import frappe
 import json
 from frappe.model.document import Document
@@ -43,6 +44,7 @@ class SmartTyreRealtimeData(Document):
 def pull_realtime_data(**args):
 	if isinstance(args, str):
 		args = json.loads(args)
+	args.pop('cmd')
 	erp_time_stamp = frappe.utils.now()
 	args['erp_time_stamp']=erp_time_stamp
 	frappe.get_doc({
@@ -128,7 +130,36 @@ def get_smart_tyre_data_bulk(filters=None):
 	cursor = collection.aggregate(pipeline)
 	results = list(cursor)
 	client_server.close()
-	final_data={}
-	for result in results:
-		final_data[result.get('_id')] = json.loads(result.get('latest_data').get('overall_response'))
-	return final_data
+	vehicles = [d.get("_id") for d in results if "_id" in d]
+	if vehicles:
+		final_data={}
+		url = "https://desk.lnder.in/api/method/tyre_management.tyre_management.doctype.vehicle_tire_position.vehicle_tire_position.get_vehicle_tyre_positions"
+		body = {
+			"vehicles":vehicles
+		}
+		headers = {"Authorization":"token 5d86d079564a18a:80e46996b1b9eaf"}
+		response = requests.post(
+			url = url,
+			json = body,
+			headers = headers
+		)
+		if response.ok:
+			response=response.json()
+			for result in results:
+				if response.get(result.get('_id')):
+					final_data[result.get('_id')]={}
+					smart_tyre_data = json.loads(result.get('latest_data').get('overall_response'))
+					for idx,data in enumerate(response.get(result.get('_id'))):
+						final_data[result.get('_id')]={
+							"tyre_position"+str(idx) : list(data.keys())[0],
+							"tyre_serial_no"+str(idx) : list(data.values())[0],
+						}
+						fields = ["Pres_","Temp_","Bat_","Event_"]
+						for field in fields:
+							final_data[result.get('_id')][field+str(idx)] = smart_tyre_data.get(field+str(idx))
+
+			return final_data
+		else:
+			return response.raise_for_status()
+	else:
+		return []
