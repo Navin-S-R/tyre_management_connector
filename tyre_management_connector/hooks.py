@@ -113,23 +113,23 @@ app_license = "MIT"
 # Scheduled Tasks
 # ---------------
 
-# scheduler_events = {
+scheduler_events = {
 #	"all": [
 #		"tyre_management_connector.tasks.all"
 #	],
 #	"daily": [
 #		"tyre_management_connector.tasks.daily"
 #	],
-#	"hourly": [
-#		"tyre_management_connector.tasks.hourly"
-#	],
+	"hourly": [
+		"tyre_management_connector.python.intangles_api.update_odometer_value"
+	]
 #	"weekly": [
 #		"tyre_management_connector.tasks.weekly"
 #	],
 #	"monthly": [
 #		"tyre_management_connector.tasks.monthly"
 #	],
-# }
+}
 
 # Testing
 # -------

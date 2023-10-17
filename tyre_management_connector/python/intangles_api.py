@@ -34,3 +34,17 @@ def get_intangles_odometer_data(start_time=None,end_time=None,vehicle_no=None):
 		return reqd_data
 	else:
 		response.raise_for_status()
+#Update ODOMETER Value
+def update_odometer_value():
+	odometer_value=get_intangles_odometer_data()
+	url = "https://desk.lnder.in/api/method/tyre_management.tyre_management.doctype.tyre_serial_no.tyre_serial_no.update_odometer_value"
+	payload = json.dumps({"args":[odometer_value]})
+	headers = {
+		'Authorization': 'token 5d86d079564a18a:80e46996b1b9eaf',
+		'Content-Type': 'application/json'
+	}
+	response = requests.request("POST", url, headers=headers, data=payload)
+	if response.ok:
+		response=response.json()
+	else:
+		frappe.log_error(response.raise_for_status())
