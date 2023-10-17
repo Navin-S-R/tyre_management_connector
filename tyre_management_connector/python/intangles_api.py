@@ -3,6 +3,7 @@ import json
 from datetime import datetime
 import requests
 
+@frappe.whitelist()
 def get_intangles_odometer_data(start_time=None,end_time=None,vehicle_no=None):
 	connector_doc=frappe.get_single("Intangles Connector")
 	if not start_time and not end_time:
