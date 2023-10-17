@@ -7,6 +7,7 @@ import json
 from frappe.model.document import Document
 from datetime import datetime
 from pymongo import MongoClient,ASCENDING,DESCENDING
+from tyre_management_connector.python.intangles_api import get_intangles_odometer_data
 
 class SmartTyreRealtimeData(Document):
 	def __init__(self,*args,**kwargs):
@@ -143,29 +144,50 @@ def get_smart_tyre_data_bulk(filters=None):
 		response = requests.request("GET", url, headers=headers, data=payload)
 		if response.ok:
 			response=response.json().get('message')
+			odometer_details = get_intangles_odometer_data(vehicle_no=vehicles)
 			for result in results:
 				if response.get(result.get('_id')):
 					smart_tyre_data = json.loads(result.get('latest_data').get('overall_response'))
 					for idx,key in enumerate(response.get(result.get('_id'))):
 						if (final_data.get(result.get('_id'))):
-							final_data_add={
-							"tyre_position": key,
-							"tyre_serial_no": response.get(result.get('_id')).get(key),
-							"Pres":smart_tyre_data.get("Pres_"+str(idx)),
-							"Temp":smart_tyre_data.get("Temp_"+str(idx)),
-							"Bat":smart_tyre_data.get("Bat_"+str(idx)),
-							"Event":smart_tyre_data.get("Event_"+str(idx))
-							}
-							final_data[result.get('_id')].append(final_data_add)
+							final_data[result.get('_id')].append({
+								"tyre_position": key,
+								"tyre_serial_no": response.get(result.get('_id')).get(key),
+								"Pres":smart_tyre_data.get("Pres_"+str(idx)),
+								"Temp":smart_tyre_data.get("Temp_"+str(idx)),
+								"Bat":smart_tyre_data.get("Bat_"+str(idx)),
+								"Event":smart_tyre_data.get("Event_"+str(idx)),
+								"erp_time_stamp":smart_tyre_data.get("erp_time_stamp")
+							})
 						else:
-							final_data[result.get('_id')]=[{
-							"tyre_position": key,
-							"tyre_serial_no": response.get(result.get('_id')).get(key),
-							"Pres":smart_tyre_data.get("Pres_"+str(idx)),
-							"Temp":smart_tyre_data.get("Temp_"+str(idx)),
-							"Bat":smart_tyre_data.get("Bat_"+str(idx)),
-							"Event":smart_tyre_data.get("Event_"+str(idx))
-						}]
+							for data in odometer_details:
+								if data.get('plate') == result.get('_id'):
+									final_data[result.get('_id')]=[{
+										"current_odometer_value" : data.get('end').get('odo_km'),
+										"current_engine_hours" : data.get('end').get('engine_hours'),
+										"total_distance_today" : data.get('end').get('total_distance'),
+										"total_engine_hours_today" : data.get('end').get('total_engine_hours')
+									}]
+							if (final_data.get(result.get('_id'))):
+								final_data[result.get('_id')].append({
+									"tyre_position": key,
+									"tyre_serial_no": response.get(result.get('_id')).get(key),
+									"Pres":smart_tyre_data.get("Pres_"+str(idx)),
+									"Temp":smart_tyre_data.get("Temp_"+str(idx)),
+									"Bat":smart_tyre_data.get("Bat_"+str(idx)),
+									"Event":smart_tyre_data.get("Event_"+str(idx)),
+									"erp_time_stamp":smart_tyre_data.get("erp_time_stamp"),
+								})
+							else:
+								final_data[result.get('_id')]=[{
+									"tyre_position": key,
+									"tyre_serial_no": response.get(result.get('_id')).get(key),
+									"Pres":smart_tyre_data.get("Pres_"+str(idx)),
+									"Temp":smart_tyre_data.get("Temp_"+str(idx)),
+									"Bat":smart_tyre_data.get("Bat_"+str(idx)),
+									"Event":smart_tyre_data.get("Event_"+str(idx)),
+									"erp_time_stamp":smart_tyre_data.get("erp_time_stamp"),
+								}]
 			return final_data
 		else:
 			return response.raise_for_status()
