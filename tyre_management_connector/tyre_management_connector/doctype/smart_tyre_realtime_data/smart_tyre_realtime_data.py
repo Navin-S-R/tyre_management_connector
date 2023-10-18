@@ -101,7 +101,7 @@ def get_smart_tyre_data(
 
 #Get Bulk
 @frappe.whitelist()
-def get_smart_tyre_data_bulk(filters=None):
+def get_smart_tyre_data_bulk(filters=None,odometer_value=None):
 	mongo_uri = frappe.db.get_single_value("MongoDB Connector","url")
 	client_server = MongoClient(mongo_uri)
 	db = client_server.get_database()
@@ -144,7 +144,8 @@ def get_smart_tyre_data_bulk(filters=None):
 		response = requests.request("GET", url, headers=headers, data=payload)
 		if response.ok:
 			response=response.json().get('message')
-			odometer_details = get_intangles_odometer_data(vehicle_no=vehicles)
+			if odometer_value:
+				odometer_details = get_intangles_odometer_data(vehicle_no=vehicles)
 			for result in results:
 				if response.get(result.get('_id')):
 					smart_tyre_data = json.loads(result.get('latest_data').get('overall_response'))
