@@ -153,6 +153,7 @@ def get_smart_tyre_data_bulk(filters=None,odometer_value=None):
 				if response.get(result.get('_id')):
 					smart_tyre_data = json.loads(result.get('latest_data').get('overall_response'))
 					for idx,key in enumerate(response.get(result.get('_id'))):
+						if key == "tyre_optimal_values": continue
 						if (final_data.get(result.get('_id'))):
 							final_data[result.get('_id')].append({
 								"tyre_position": key,
