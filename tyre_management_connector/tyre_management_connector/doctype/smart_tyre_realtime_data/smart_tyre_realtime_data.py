@@ -5,7 +5,7 @@ import requests
 import frappe
 import json
 from frappe.model.document import Document
-from datetime import datetime
+from datetime import datetime,timedelta
 from pymongo import MongoClient,ASCENDING,DESCENDING
 from tyre_management_connector.python.intangles_api import get_intangles_odometer_data
 
@@ -210,3 +210,17 @@ def get_smart_tyre_data_bulk(filters=None,odometer_value=None):
 			return response.raise_for_status()
 	else:
 		return []
+
+#Delete data
+def delete_old_smart_tyre_data():
+	mongo_uri = frappe.db.get_single_value("MongoDB Connector", "url")
+	client = MongoClient(mongo_uri)
+	db = client.get_database()
+	collection = db['smart_tyre_data']
+	threshold_date = datetime.now() - timedelta(days=2)
+	query = {
+		"modified": {"$lt": threshold_date}
+	}
+	result = collection.delete_many(query)
+	client.close()
+	#return result.deleted_count

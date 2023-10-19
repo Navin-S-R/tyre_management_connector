@@ -4,7 +4,7 @@
 import frappe
 import json
 from frappe.model.document import Document
-from datetime import datetime
+from datetime import datetime, timedelta
 from pymongo import MongoClient,ASCENDING,DESCENDING
 
 class VehicleRealtimeData(Document):
@@ -93,3 +93,17 @@ def get_intangles_vehicle_data_bulk(filters=None):
 	for result in results:
 		final_data[result.get('_id')] = json.loads(result.get('latest_data').get('overall_response'))
 	return final_data
+
+#Delete data
+def delete_old_intangles_vehicle_data():
+	mongo_uri = frappe.db.get_single_value("MongoDB Connector", "url")
+	client = MongoClient(mongo_uri)
+	db = client.get_database()
+	collection = db['intangles_vehicle_data']
+	threshold_date = datetime.now() - timedelta(days=2)
+	query = {
+		"modified": {"$lt": threshold_date}
+	}
+	result = collection.delete_many(query)
+	client.close()
+	#return result.deleted_count
