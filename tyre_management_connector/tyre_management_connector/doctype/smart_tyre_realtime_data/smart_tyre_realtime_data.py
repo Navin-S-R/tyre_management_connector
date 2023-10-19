@@ -162,10 +162,10 @@ def get_smart_tyre_data_bulk(filters=None,odometer_value=None):
 								"Bat":float(smart_tyre_data.get("Bat_"+str(idx))) if smart_tyre_data.get("Bat_"+str(idx)) != "-" else 0,
 								"Event":float(smart_tyre_data.get("Event_"+str(idx))) if smart_tyre_data.get("Event_"+str(idx)) != "-" else 0,
 								"erp_time_stamp":smart_tyre_data.get("erp_time_stamp"),
-								"min_tyre_pressure" : response.get(result.get('_id')).get(key).get('tyre_optimal_values').get('min_tyre_pressure'),
-								"max_tyre_pressure" : response.get(result.get('_id')).get(key).get('tyre_optimal_values').get('max_tyre_pressure'),
-								"min_tyre_temperature" : response.get(result.get('_id')).get(key).get('tyre_optimal_values').get('min_tyre_temperature'),
-								"max_tyre_temperature" : response.get(result.get('_id')).get(key).get('tyre_optimal_values').get('max_tyre_temperature')
+								"min_tyre_pressure" : response.get(result.get('_id')).get('tyre_optimal_values').get('min_tyre_pressure'),
+								"max_tyre_pressure" : response.get(result.get('_id')).get('tyre_optimal_values').get('max_tyre_pressure'),
+								"min_tyre_temperature" : response.get(result.get('_id')).get('tyre_optimal_values').get('min_tyre_temperature'),
+								"max_tyre_temperature" : response.get(result.get('_id')).get('tyre_optimal_values').get('max_tyre_temperature')
 							})
 						else:
 							for data in odometer_details:
@@ -185,10 +185,10 @@ def get_smart_tyre_data_bulk(filters=None,odometer_value=None):
 									"Bat":float(smart_tyre_data.get("Bat_"+str(idx))) if smart_tyre_data.get("Bat_"+str(idx)) != "-" else 0,
 									"Event":float(smart_tyre_data.get("Event_"+str(idx))) if smart_tyre_data.get("Event_"+str(idx)) != "-" else 0,
 									"erp_time_stamp":smart_tyre_data.get("erp_time_stamp"),
-									"min_tyre_pressure" : response.get(result.get('_id')).get(key).get('tyre_optimal_values').get('min_tyre_pressure'),
-									"max_tyre_pressure" : response.get(result.get('_id')).get(key).get('tyre_optimal_values').get('max_tyre_pressure'),
-									"min_tyre_temperature" : response.get(result.get('_id')).get(key).get('tyre_optimal_values').get('min_tyre_temperature'),
-									"max_tyre_temperature" : response.get(result.get('_id')).get(key).get('tyre_optimal_values').get('max_tyre_temperature')
+									"min_tyre_pressure" : response.get(result.get('_id')).get('tyre_optimal_values').get('min_tyre_pressure'),
+									"max_tyre_pressure" : response.get(result.get('_id')).get('tyre_optimal_values').get('max_tyre_pressure'),
+									"min_tyre_temperature" : response.get(result.get('_id')).get('tyre_optimal_values').get('min_tyre_temperature'),
+									"max_tyre_temperature" : response.get(result.get('_id')).get('tyre_optimal_values').get('max_tyre_temperature')
 								})
 							else:
 								final_data[result.get('_id')]=[{
@@ -199,10 +199,10 @@ def get_smart_tyre_data_bulk(filters=None,odometer_value=None):
 									"Bat":float(smart_tyre_data.get("Bat_"+str(idx))) if smart_tyre_data.get("Bat_"+str(idx)) != "-" else 0,
 									"Event":float(smart_tyre_data.get("Event_"+str(idx))) if smart_tyre_data.get("Event_"+str(idx)) != "-" else 0,
 									"erp_time_stamp":smart_tyre_data.get("erp_time_stamp"),
-									"min_tyre_pressure" : response.get(result.get('_id')).get(key).get('tyre_optimal_values').get('min_tyre_pressure'),
-									"max_tyre_pressure" : response.get(result.get('_id')).get(key).get('tyre_optimal_values').get('max_tyre_pressure'),
-									"min_tyre_temperature" : response.get(result.get('_id')).get(key).get('tyre_optimal_values').get('min_tyre_temperature'),
-									"max_tyre_temperature" : response.get(result.get('_id')).get(key).get('tyre_optimal_values').get('max_tyre_temperature')
+									"min_tyre_pressure" : response.get(result.get('_id')).get('tyre_optimal_values').get('min_tyre_pressure'),
+									"max_tyre_pressure" : response.get(result.get('_id')).get('tyre_optimal_values').get('max_tyre_pressure'),
+									"min_tyre_temperature" : response.get(result.get('_id')).get('tyre_optimal_values').get('min_tyre_temperature'),
+									"max_tyre_temperature" : response.get(result.get('_id')).get('tyre_optimal_values').get('max_tyre_temperature')
 								}]
 			return final_data
 		else:
