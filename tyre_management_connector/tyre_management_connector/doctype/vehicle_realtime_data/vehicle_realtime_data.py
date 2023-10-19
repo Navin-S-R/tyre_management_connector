@@ -102,8 +102,8 @@ def delete_old_intangles_vehicle_data():
 	collection = db['intangles_vehicle_data']
 	threshold_date = datetime.now() - timedelta(days=2)
 	query = {
-		"modified": {"$lt": threshold_date}
+		"modified": {"$lt": str(threshold_date)}
 	}
 	result = collection.delete_many(query)
 	client.close()
-	#return result.deleted_count
+	return result.deleted_count

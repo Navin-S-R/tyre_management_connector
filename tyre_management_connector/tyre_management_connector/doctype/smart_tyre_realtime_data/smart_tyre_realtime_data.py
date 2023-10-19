@@ -217,10 +217,10 @@ def delete_old_smart_tyre_data():
 	client = MongoClient(mongo_uri)
 	db = client.get_database()
 	collection = db['smart_tyre_data']
-	threshold_date = datetime.now() - timedelta(days=2)
+	threshold_date = datetime.now() - timedelta(days=1)
 	query = {
-		"modified": {"$lt": threshold_date}
+		"modified": {"$lt": str(threshold_date)}
 	}
 	result = collection.delete_many(query)
 	client.close()
-	#return result.deleted_count
+	return result.deleted_count
