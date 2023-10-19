@@ -157,10 +157,10 @@ def get_smart_tyre_data_bulk(filters=None,odometer_value=None):
 							final_data[result.get('_id')].append({
 								"tyre_position": key,
 								"tyre_serial_no": response.get(result.get('_id')).get(key),
-								"Pres":float(smart_tyre_data.get("Pres_"+str(idx))) if smart_tyre_data.get("Pres_"+str(idx)) != "_" else 0,
-								"Temp":float(smart_tyre_data.get("Temp_"+str(idx))) if smart_tyre_data.get("Temp_"+str(idx)) != "_" else 0,
-								"Bat":float(smart_tyre_data.get("Bat_"+str(idx))) if smart_tyre_data.get("Bat_"+str(idx)) != "_" else 0,
-								"Event":float(smart_tyre_data.get("Event_"+str(idx))) if smart_tyre_data.get("Event_"+str(idx)) != "_" else 0,
+								"Pres":float(smart_tyre_data.get("Pres_"+str(idx))) if smart_tyre_data.get("Pres_"+str(idx)) != "-" else 0,
+								"Temp":float(smart_tyre_data.get("Temp_"+str(idx))) if smart_tyre_data.get("Temp_"+str(idx)) != "-" else 0,
+								"Bat":float(smart_tyre_data.get("Bat_"+str(idx))) if smart_tyre_data.get("Bat_"+str(idx)) != "-" else 0,
+								"Event":float(smart_tyre_data.get("Event_"+str(idx))) if smart_tyre_data.get("Event_"+str(idx)) != "-" else 0,
 								"erp_time_stamp":smart_tyre_data.get("erp_time_stamp")
 							})
 						else:
@@ -176,20 +176,20 @@ def get_smart_tyre_data_bulk(filters=None,odometer_value=None):
 								final_data[result.get('_id')].append({
 									"tyre_position": key,
 									"tyre_serial_no": response.get(result.get('_id')).get(key),
-									"Pres":float(smart_tyre_data.get("Pres_"+str(idx))) if smart_tyre_data.get("Pres_"+str(idx)) != "_" else 0,
-									"Temp":float(smart_tyre_data.get("Temp_"+str(idx))) if smart_tyre_data.get("Temp_"+str(idx)) != "_" else 0,
-									"Bat":float(smart_tyre_data.get("Bat_"+str(idx))) if smart_tyre_data.get("Bat_"+str(idx)) != "_" else 0,
-									"Event":float(smart_tyre_data.get("Event_"+str(idx))) if smart_tyre_data.get("Event_"+str(idx)) != "_" else 0,
+									"Pres":float(smart_tyre_data.get("Pres_"+str(idx))) if smart_tyre_data.get("Pres_"+str(idx)) != "-" else 0,
+									"Temp":float(smart_tyre_data.get("Temp_"+str(idx))) if smart_tyre_data.get("Temp_"+str(idx)) != "-" else 0,
+									"Bat":float(smart_tyre_data.get("Bat_"+str(idx))) if smart_tyre_data.get("Bat_"+str(idx)) != "-" else 0,
+									"Event":float(smart_tyre_data.get("Event_"+str(idx))) if smart_tyre_data.get("Event_"+str(idx)) != "-" else 0,
 									"erp_time_stamp":smart_tyre_data.get("erp_time_stamp"),
 								})
 							else:
 								final_data[result.get('_id')]=[{
 									"tyre_position": key,
 									"tyre_serial_no": response.get(result.get('_id')).get(key),
-									"Pres":float(smart_tyre_data.get("Pres_"+str(idx))) if smart_tyre_data.get("Pres_"+str(idx)) != "_" else 0,
-									"Temp":float(smart_tyre_data.get("Temp_"+str(idx))) if smart_tyre_data.get("Temp_"+str(idx)) != "_" else 0,
-									"Bat":float(smart_tyre_data.get("Bat_"+str(idx))) if smart_tyre_data.get("Bat_"+str(idx)) != "_" else 0,
-									"Event":float(smart_tyre_data.get("Event_"+str(idx))) if smart_tyre_data.get("Event_"+str(idx)) != "_" else 0,
+									"Pres":float(smart_tyre_data.get("Pres_"+str(idx))) if smart_tyre_data.get("Pres_"+str(idx)) != "-" else 0,
+									"Temp":float(smart_tyre_data.get("Temp_"+str(idx))) if smart_tyre_data.get("Temp_"+str(idx)) != "-" else 0,
+									"Bat":float(smart_tyre_data.get("Bat_"+str(idx))) if smart_tyre_data.get("Bat_"+str(idx)) != "-" else 0,
+									"Event":float(smart_tyre_data.get("Event_"+str(idx))) if smart_tyre_data.get("Event_"+str(idx)) != "-" else 0,
 									"erp_time_stamp":smart_tyre_data.get("erp_time_stamp"),
 								}]
 			return final_data
