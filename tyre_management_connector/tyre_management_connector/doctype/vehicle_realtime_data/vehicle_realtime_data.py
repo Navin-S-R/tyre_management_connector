@@ -100,7 +100,7 @@ def delete_old_intangles_vehicle_data():
 	client = MongoClient(mongo_uri)
 	db = client.get_database()
 	collection = db['intangles_vehicle_data']
-	threshold_date = datetime.now() - timedelta(days=2)
+	threshold_date = datetime.now() - timedelta(days=1)
 	query = {
 		"modified": {"$lt": str(threshold_date)}
 	}
