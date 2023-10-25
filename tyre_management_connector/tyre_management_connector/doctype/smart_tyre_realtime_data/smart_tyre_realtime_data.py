@@ -225,5 +225,6 @@ def delete_old_smart_tyre_data():
 		"modified": {"$lt": str(threshold_date)}
 	}
 	result = collection.delete_many(query)
+	collection.drop_indexes()
 	client.close()
 	return result.deleted_count

@@ -105,5 +105,6 @@ def delete_old_intangles_vehicle_data():
 		"modified": {"$lt": str(threshold_date)}
 	}
 	result = collection.delete_many(query)
+	collection.drop_indexes()
 	client.close()
 	return result.deleted_count
