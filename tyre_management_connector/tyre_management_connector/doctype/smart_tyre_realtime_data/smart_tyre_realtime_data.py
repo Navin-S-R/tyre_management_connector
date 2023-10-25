@@ -137,7 +137,7 @@ def get_smart_tyre_data_bulk(filters=None,odometer_value=None):
 		final_data={}
 		url = "https://desk.lnder.in/api/method/tyre_management.tyre_management.doctype.vehicle_tire_position.vehicle_tire_position.get_vehicle_tyre_positions"
 
-		payload = json.dumps({"vehicles": [vehicles],"get_optimal_values":True})
+		payload = json.dumps({"vehicles": [vehicles],"get_optimal_values":True,"get_nsd_values":True})
 		headers = {
 			'Authorization': 'token 5d86d079564a18a:80e46996b1b9eaf',
 			'Content-Type': 'application/json'
@@ -154,6 +154,7 @@ def get_smart_tyre_data_bulk(filters=None,odometer_value=None):
 					smart_tyre_data = json.loads(result.get('latest_data').get('overall_response'))
 					for idx,key in enumerate(response.get(result.get('_id'))):
 						if key == "tyre_optimal_values": continue
+						if key == "nsd_values": continue
 						if (final_data.get(result.get('_id'))):
 							final_data[result.get('_id')].append({
 								"tyre_position": key,
