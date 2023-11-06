@@ -6,7 +6,7 @@ import json
 from frappe.model.document import Document
 from datetime import datetime, timedelta
 from pymongo import MongoClient,ASCENDING,DESCENDING
-
+import requests
 class VehicleRealtimeData(Document):
 	def __init__(self,*args,**kwargs):
 		super().__init__(*args,**kwargs)
@@ -42,7 +42,6 @@ class VehicleRealtimeData(Document):
 import frappe
 @frappe.whitelist()
 def pull_realtime_data(**args):
-#	frappe.log_error(message = args, title = "Intangles Realtime Data")
 	if isinstance(args, str):
 		args = json.loads(args)
 	erp_time_stamp = frappe.utils.now()
@@ -92,6 +91,13 @@ def get_intangles_vehicle_data_bulk(filters=None):
 	final_data={}
 	for result in results:
 		final_data[result.get('_id')] = json.loads(result.get('latest_data').get('overall_response'))
+		url = "https://geocode.maps.co/reverse?lat=13.066&lon=80.206"
+		payload = {}
+		headers = {}
+		response = requests.request("GET", url, headers=headers, data=payload)
+		if response.ok:
+			response=response.json()
+			final_data[result.get('_id')]["location_details"] = response
 	return final_data
 
 #Delete data
