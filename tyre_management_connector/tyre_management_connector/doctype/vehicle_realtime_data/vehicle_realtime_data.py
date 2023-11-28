@@ -91,7 +91,8 @@ def get_intangles_vehicle_data_bulk(filters=None):
 	final_data={}
 	for result in results:
 		final_data[result.get('_id')] = json.loads(result.get('latest_data').get('overall_response'))
-		url = "https://geocode.maps.co/reverse?lat=13.066&lon=80.206"
+		url = f"https://geocode.maps.co/reverse?lat={json.loads(result.get('latest_data').get('overall_response')).get('geo').get('lat')}&lon={json.loads(result.get('latest_data').get('overall_response')).get('geo').get('lng')}"
+
 		payload = {}
 		headers = {}
 		response = requests.request("GET", url, headers=headers, data=payload)
@@ -112,5 +113,6 @@ def delete_old_intangles_vehicle_data():
 	}
 	result = collection.delete_many(query)
 	collection.drop_indexes()
+	db.command("compact", collection.name)
 	client.close()
 	return result.deleted_count

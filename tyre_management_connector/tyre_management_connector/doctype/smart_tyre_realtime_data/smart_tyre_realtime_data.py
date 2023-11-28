@@ -130,6 +130,7 @@ def get_smart_tyre_data_bulk(filters=None,odometer_value=None):
 	]
 	cursor = collection.aggregate(pipeline)
 	results = list(cursor)
+	print(results)
 	client_server.close()
 	vehicles = [d.get("_id") for d in results if "_id" in d]
 	if vehicles:
@@ -226,5 +227,6 @@ def delete_old_smart_tyre_data():
 	}
 	result = collection.delete_many(query)
 	collection.drop_indexes()
+	db.command("compact", collection.name)
 	client.close()
 	return result.deleted_count
