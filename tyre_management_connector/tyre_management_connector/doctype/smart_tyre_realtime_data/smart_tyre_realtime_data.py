@@ -16,7 +16,7 @@ class SmartTyreRealtimeData(Document):
 		self.mongo_uri = mongo_uri
 		self.client = MongoClient(self.mongo_uri)
 		self.db = self.client.get_database()
-	
+
 	def db_insert(self, *args, **kwargs):
 		my_collection = self.db["smart_tyre_data"]
 		data_to_insert = self.get_valid_dict(convert_dates_to_str=True)
@@ -67,7 +67,7 @@ def get_smart_tyre_data(
 		limit=None,
 		sort=None
 	):
-	
+
 	# from_date = str(datetime(2023, 10, 6, 00, 00, 00, 00))
 	# to_date = str(datetime(2023, 10, 10, 23, 59, 59, 00))
 
@@ -82,10 +82,10 @@ def get_smart_tyre_data(
 		filters["vehicle_no"]=vehicle_no
 	if device_id:
 		filters["device_id"]=device_id
-	
+
 	limit = int(limit) if limit and int(limit) else 0
 	sort = 1 if sort=="ASC" else -1
-	
+
 	#Create MongoDB connection
 	mongo_uri = frappe.db.get_single_value("MongoDB Connector","url")
 	client_server = MongoClient(mongo_uri)
@@ -226,5 +226,6 @@ def delete_old_smart_tyre_data():
 	}
 	result = collection.delete_many(query)
 	collection.drop_indexes()
+	db.command("compact", collection.name)
 	client.close()
 	return result.deleted_count

@@ -14,7 +14,7 @@ class VehicleRealtimeData(Document):
 		self.mongo_uri = mongo_uri
 		self.client = MongoClient(self.mongo_uri)
 		self.db = self.client.get_database()
-	
+
 	def db_insert(self, *args, **kwargs):
 		my_collection = self.db["intangles_vehicle_data"]
 		data_to_insert = self.get_valid_dict(convert_dates_to_str=True)
@@ -114,3 +114,53 @@ def delete_old_intangles_vehicle_data():
 	collection.drop_indexes()
 	client.close()
 	return result.deleted_count
+
+
+#Get long standing vehicle status
+def find_stopped_vehicles(threshold_minutes=20):
+	mongo_uri = frappe.db.get_single_value("MongoDB Connector", "url")
+	client_server = MongoClient(mongo_uri)
+	db = client_server.get_database()
+	collection = db['intangles_vehicle_data']
+
+	current_time = datetime.now()
+	threshold_time = current_time - timedelta(minutes=threshold_minutes)
+
+	query = {
+		"$or": [
+			{"geocode": {"$exists": True}},
+			{"geo": {"$exists": True}}
+		]
+	}
+
+	pipeline = [
+		{"$match": query},
+		{"$sort": {"vehicle_no": 1, "modified": -1}},
+		{"$group": {
+			"_id": "$vehicle_no",
+			"latest_data": {"$first": "$$ROOT"}
+		}}
+	]
+
+	cursor = collection.aggregate(pipeline)
+	results = list(cursor)
+	client_server.close()
+
+	stopped_vehicles = []
+
+	for result in results:
+		vehicle_data = result.get('latest_data')
+		location_info = vehicle_data.get('geocode', {}) or vehicle_data.get('geo', {})
+		timestamp = vehicle_data.get('erp_time_stamp')
+
+		# Check if the vehicle has stayed in the same place for more than threshold_minutes
+		if timestamp and location_info.get('lat') and location_info.get('lng'):
+			location_time = datetime.strptime(timestamp, "%Y-%m-%d %H:%M:%S.%f")
+			if location_time <= threshold_time:
+				stopped_vehicles.append({
+					"vehicle_no": result.get('_id'),
+					"last_location": location_info,
+					"last_update_time": timestamp
+				})
+
+	return stopped_vehicles
