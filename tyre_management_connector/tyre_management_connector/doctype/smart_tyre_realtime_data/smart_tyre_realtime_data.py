@@ -130,6 +130,7 @@ def get_smart_tyre_data_bulk(filters=None,odometer_value=None):
 	]
 	cursor = collection.aggregate(pipeline)
 	results = list(cursor)
+	print(results)
 	client_server.close()
 	vehicles = [d.get("_id") for d in results if "_id" in d]
 	if vehicles:
