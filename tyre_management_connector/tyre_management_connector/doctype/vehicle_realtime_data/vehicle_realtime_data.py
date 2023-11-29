@@ -125,44 +125,76 @@ def find_stopped_vehicles(threshold_minutes=20):
 	db = client_server.get_database()
 	collection = db['intangles_vehicle_data']
 
-	current_time = datetime.now()
-	threshold_time = current_time - timedelta(minutes=threshold_minutes)
+	current_time = frappe.utils.now()
+	threshold_time = frappe.utils.add_days(current_time, days=-1 * threshold_minutes / (24 * 60))
 
-	query = {
-		"$or": [
-			{"geocode": {"$exists": True}},
-			{"geo": {"$exists": True}}
-		]
-	}
+	# Convert threshold_time to a datetime object
+	threshold_time = datetime.strptime(str(threshold_time), "%Y-%m-%d %H:%M:%S.%f")
+
+	# Add debugging print statements
+	print(f"Debug: Current Time: {current_time}")
+	print(f"Debug: Threshold Time: {threshold_time}")
 
 	pipeline = [
-		{"$match": query},
-		{"$sort": {"vehicle_no": 1, "modified": -1}},
+		{"$match": {
+			"erp_time_stamp": {
+				"$gte": str(threshold_time),
+				"$lt": str(current_time)
+			}
+		}},
+		{"$sort": {"vehicle_no": 1, "erp_time_stamp": 1}},
 		{"$group": {
 			"_id": "$vehicle_no",
-			"latest_data": {"$first": "$$ROOT"}
+			"data": {"$push": "$$ROOT"}
 		}}
 	]
 
 	cursor = collection.aggregate(pipeline)
 	results = list(cursor)
+
+	# Add more print statements for debugging
+	print(f"Debug: Number of Results: {len(results)}")
+
 	client_server.close()
 
 	stopped_vehicles = []
 
 	for result in results:
-		vehicle_data = result.get('latest_data')
-		location_info = vehicle_data.get('geocode', {}) or vehicle_data.get('geo', {})
-		timestamp = vehicle_data.get('erp_time_stamp')
+		vehicle_data_list = result.get('data')
+		if len(vehicle_data_list) > 1:
+			# Get the first set of data (before threshold)
+			before_threshold_data = vehicle_data_list[0]
 
-		# Check if the vehicle has stayed in the same place for more than threshold_minutes
-		if timestamp and location_info.get('lat') and location_info.get('lng'):
-			location_time = datetime.strptime(timestamp, "%Y-%m-%d %H:%M:%S.%f")
-			if location_time <= threshold_time:
+			# Get the latest set of data
+			latest_data = vehicle_data_list[-1]
+
+			before_threshold_geocode = json.loads(before_threshold_data.get('overall_response', '{}')).get('geocode', {})
+			latest_geocode = json.loads(latest_data.get('overall_response', '{}')).get('geocode', {})
+
+			# Compare geocodes for both sets
+			if (
+				before_threshold_geocode.get('lat') == latest_geocode.get('lat') and
+				before_threshold_geocode.get('lng') == latest_geocode.get('lng')
+			):
+				try:
+					url = f"https://geocode.maps.co/reverse?lat={latest_geocode.get('lat')}&lon={latest_geocode.get('lng')}"
+					payload = {}
+					headers = {}
+					response = requests.request("GET", url, headers=headers, data=payload)
+					if response.ok:
+						response=response.json()
+						response.pop('licence')
+						response.pop('powered_by')
+						response.pop('osm_type')
+						response.pop('osm_id')
+						last_location=response
+				except:
+					last_location=None
 				stopped_vehicles.append({
 					"vehicle_no": result.get('_id'),
-					"last_location": location_info,
-					"last_update_time": timestamp
+					"last_geocode": latest_geocode,
+					"last_location": last_location, 
+					"last_update_time": latest_data.get('erp_time_stamp')
 				})
 
 	return stopped_vehicles
