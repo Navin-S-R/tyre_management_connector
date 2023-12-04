@@ -47,6 +47,8 @@ def pull_realtime_data(**args):
 	erp_time_stamp = frappe.utils.now()
 	args.pop('cmd')
 	args['erp_time_stamp']=erp_time_stamp
+	location_details=get_location_for_lat_lng(lat=args.get('geocode').get('lat'),lng=args.get('geocode').get('lng'))
+	args['location_details']=location_details or {}
 	frappe.get_doc({
 				"doctype" : "Vehicle Realtime Data",
 				"device_id" : args.get('device_id'),
@@ -91,14 +93,7 @@ def get_intangles_vehicle_data_bulk(filters=None):
 	final_data={}
 	for result in results:
 		final_data[result.get('_id')] = json.loads(result.get('latest_data').get('overall_response'))
-		url = f"https://geocode.maps.co/reverse?lat={json.loads(result.get('latest_data').get('overall_response')).get('geo').get('lat')}&lon={json.loads(result.get('latest_data').get('overall_response')).get('geo').get('lng')}"
-
-		payload = {}
-		headers = {}
-		response = requests.request("GET", url, headers=headers, data=payload)
-		if response.ok:
-			response=response.json()
-			final_data[result.get('_id')]["location_details"] = response
+		final_data[result.get('_id')]["location_details"] = json.loads(result.get('latest_data').get('overall_response')).get('location_details', {})
 	return final_data
 
 #Delete data
@@ -176,25 +171,23 @@ def find_stopped_vehicles(threshold_minutes=20):
 				before_threshold_geocode.get('lat') == latest_geocode.get('lat') and
 				before_threshold_geocode.get('lng') == latest_geocode.get('lng')
 			):
-				try:
-					url = f"https://geocode.maps.co/reverse?lat={latest_geocode.get('lat')}&lon={latest_geocode.get('lng')}"
-					payload = {}
-					headers = {}
-					response = requests.request("GET", url, headers=headers, data=payload)
-					if response.ok:
-						response=response.json()
-						response.pop('licence')
-						response.pop('powered_by')
-						response.pop('osm_type')
-						response.pop('osm_id')
-						last_location=response
-				except:
-					last_location=None
 				stopped_vehicles.append({
 					"vehicle_no": result.get('_id'),
 					"last_geocode": latest_geocode,
-					"last_location": last_location, 
+					"last_location": json.loads(latest_data.get('overall_response', '{}')).get('location_details', {}),
 					"last_update_time": latest_data.get('erp_time_stamp')
 				})
 
 	return stopped_vehicles
+
+
+def get_location_for_lat_lng(lat, lng):
+	url = f"https://geocode.maps.co/reverse?lat={lat}&lon={lng}"
+	response = requests.request("GET", url, headers={}, data={})
+	if response.ok:
+		response=response.json()
+		response.pop('licence')
+		response.pop('powered_by')
+		response.pop('osm_type')
+		response.pop('osm_id')
+		return response
