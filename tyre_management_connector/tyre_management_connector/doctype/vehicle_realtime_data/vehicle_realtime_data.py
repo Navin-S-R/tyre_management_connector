@@ -47,8 +47,6 @@ def pull_realtime_data(**args):
 	erp_time_stamp = frappe.utils.now()
 	args.pop('cmd')
 	args['erp_time_stamp']=erp_time_stamp
-	location_details=get_location_for_lat_lng(lat=args.get('geocode').get('lat'),lng=args.get('geocode').get('lng'))
-	args['location_details']=location_details or {}
 	frappe.get_doc({
 				"doctype" : "Vehicle Realtime Data",
 				"device_id" : args.get('device_id'),
@@ -92,7 +90,7 @@ def get_intangles_vehicle_data_bulk(filters=None):
 	final_data={}
 	for result in results:
 		final_data[result.get('_id')] = json.loads(result.get('latest_data').get('overall_response'))
-		final_data[result.get('_id')]["location_details"] = json.loads(result.get('latest_data').get('overall_response')).get('location_details', {})
+		final_data[result.get('_id')]["location_details"] = get_location_for_lat_lng(lat=json.loads(result.get('latest_data').get('overall_response')).get('geocode').get('lat'),lng=json.loads(result.get('latest_data').get('overall_response')).get('geocode').get('lng'))
 	return final_data
 
 #Delete data
@@ -179,7 +177,7 @@ def find_stopped_vehicles(threshold_minutes=20):
 				if standing_duration >= (threshold_minutes * 60):
 					stopped_vehicles.append({
 						"vehicle_no": vehicle_no,
-						"last_location": json.loads(current_latest_data.get('overall_response', '{}')).get('location_details', {}),
+						"last_location":  get_location_for_lat_lng(lat=json.loads(current_latest_data.get('overall_response', '{}')).get('geocode').get('lat'),lng=json.loads(current_latest_data.get('overall_response', '{}')).get('geocode').get('lng')),
 						"last_update_time": current_latest_data['erp_time_stamp']
 					})
 	return stopped_vehicles
