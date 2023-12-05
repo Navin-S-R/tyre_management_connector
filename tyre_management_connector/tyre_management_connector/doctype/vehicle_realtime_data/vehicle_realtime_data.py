@@ -57,7 +57,6 @@ def pull_realtime_data(**args):
 				"overall_response" : json.dumps(args,indent=4)
 	}).insert(ignore_permissions=True)
 	return {"response" : "Success"}
-
 #Get Bulk
 @frappe.whitelist()
 def get_intangles_vehicle_data_bulk(filters=None):
@@ -180,9 +179,7 @@ def find_stopped_vehicles(threshold_minutes=20):
 				if standing_duration >= (threshold_minutes * 60):
 					stopped_vehicles.append({
 						"vehicle_no": vehicle_no,
-						"standing_duration": standing_duration,
 						"last_location": json.loads(current_latest_data.get('overall_response', '{}')).get('location_details', {}),
-						"from_time": latest_before_threshold_data['erp_time_stamp'],
 						"last_update_time": current_latest_data['erp_time_stamp']
 					})
 	return stopped_vehicles
