@@ -112,7 +112,7 @@ def delete_old_intangles_vehicle_data():
 
 #Get long standing vehicle status
 @frappe.whitelist()
-def find_stopped_vehicles(threshold_minutes=20):
+def find_stopped_vehicles(threshold_minutes=20,get_location=False):
 	mongo_uri = frappe.db.get_single_value("MongoDB Connector", "url")
 	client_server = MongoClient(mongo_uri)
 	db = client_server.get_database()
@@ -175,11 +175,13 @@ def find_stopped_vehicles(threshold_minutes=20):
 				standing_duration = (latest_timestamp - latest_before_threshold_timestamp).total_seconds()
 
 				if standing_duration >= (threshold_minutes * 60):
-					stopped_vehicles.append({
+					data = {
 						"vehicle_no": vehicle_no,
-						"last_location":  get_location_for_lat_lng(lat=json.loads(current_latest_data.get('overall_response', '{}')).get('geocode').get('lat'),lng=json.loads(current_latest_data.get('overall_response', '{}')).get('geocode').get('lng')),
 						"last_update_time": current_latest_data['erp_time_stamp']
-					})
+					}
+					if get_location:
+						data["last_location"]=get_location_for_lat_lng(lat=json.loads(current_latest_data.get('overall_response', '{}')).get('geocode').get('lat'),lng=json.loads(current_latest_data.get('overall_response', '{}')).get('geocode').get('lng'))
+					stopped_vehicles.append(data)
 	return stopped_vehicles
 
 def get_location_for_lat_lng(lat, lng):
