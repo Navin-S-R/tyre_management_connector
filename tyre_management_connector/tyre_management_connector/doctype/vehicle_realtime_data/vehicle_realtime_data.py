@@ -114,6 +114,7 @@ def delete_old_intangles_vehicle_data():
 
 
 #Get long standing vehicle status
+@frappe.whitelist()
 def find_stopped_vehicles(threshold_minutes=20):
 	mongo_uri = frappe.db.get_single_value("MongoDB Connector", "url")
 	client_server = MongoClient(mongo_uri)
@@ -175,6 +176,7 @@ def find_stopped_vehicles(threshold_minutes=20):
 					"vehicle_no": result.get('_id'),
 					"last_geocode": latest_geocode,
 					"last_location": json.loads(latest_data.get('overall_response', '{}')).get('location_details', {}),
+					"from_time" : before_threshold_data.get('erp_time_stamp'),
 					"last_update_time": latest_data.get('erp_time_stamp')
 				})
 
