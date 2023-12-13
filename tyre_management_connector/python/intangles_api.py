@@ -49,3 +49,90 @@ def update_odometer_value():
 		response=response.json()
 	else:
 		frappe.log_error(response.raise_for_status())
+
+#Get vehicle idling Log
+def get_vehicle_idling_log(start_time=None,end_time=None,vehicle_no=None):
+	"""
+		:param start_time: The start time parameter should be in the format "YYYY-MM-DD HH:MM:SS"
+		:param end_time: The `end_time` parameter should be in the format "YYYY-MM-DD HH:MM:SS
+		:param vehicle_no: The parameter "vehicle_no" is used to specify the vehicle number
+	"""
+	connector_doc=frappe.get_single("Intangles Connector")
+	if not start_time and not end_time:
+		time_obj = datetime.now()
+		start_time = time_obj.strftime("%Y-%m-%d 00:00:00")
+		end_time = time_obj.strftime("%Y-%m-%d %H:%M:%S")
+
+	epoch = datetime(1970, 1, 1)
+	start_time_obj = datetime.strptime(start_time, "%Y-%m-%d %H:%M:%S")
+	start_time_difference = start_time_obj - epoch
+
+	end_time_obj = datetime.strptime(end_time, "%Y-%m-%d %H:%M:%S")
+	end_time_difference = end_time_obj - epoch
+
+	url = f"https://indium-apis.intangles.io/api/v1/vendor/alert_logs/{connector_doc.account_id}/list/{int(start_time_difference.total_seconds() * 1000)}/{int(end_time_difference.total_seconds() * 1000)}?types=idling"
+	headers = {
+	  'vendor-access-token': connector_doc.get_password("vendor_access_token")
+	}
+
+	response = requests.request("GET", url, headers=headers)
+	if response.ok:
+		response=response.json().get('result')
+		reqd_data=[]
+		if vehicle_no:
+			for row in response.get('logs'):
+				if row.get('vehicle_plate') in vehicle_no:
+					reqd_data.append(row)
+		else:
+			reqd_data = response.get('logs')
+		return reqd_data
+	else:
+		response.raise_for_status()
+
+#Get vehicle idling Log
+def get_vehicle_stoppage_log(start_time=None,end_time=None,vehicle_no=None,stoppage_duration=None):
+	"""
+		:param start_time: The start time parameter should be in the format "YYYY-MM-DD HH:MM:SS"
+		:param end_time: The `end_time` parameter should be in the format "YYYY-MM-DD HH:MM:SS
+		:param vehicle_no: The parameter "vehicle_no" is used to specify the vehicle number
+		:param stoppage_duration: The parameter "stoppage_duration" is used to specify the minimum stopped duration
+	"""
+	connector_doc=frappe.get_single("Intangles Connector")
+	if not start_time and not end_time:
+		time_obj = datetime.now()
+		start_time = time_obj.strftime("%Y-%m-%d 00:00:00")
+		end_time = time_obj.strftime("%Y-%m-%d %H:%M:%S")
+
+	epoch = datetime(1970, 1, 1)
+	start_time_obj = datetime.strptime(start_time, "%Y-%m-%d %H:%M:%S")
+	start_time_difference = start_time_obj - epoch
+
+	end_time_obj = datetime.strptime(end_time, "%Y-%m-%d %H:%M:%S")
+	end_time_difference = end_time_obj - epoch
+
+	url = f"https://indium-apis.intangles.io/api/v1/vendor/alert_logs/{connector_doc.account_id}/list/{int(start_time_difference.total_seconds() * 1000)}/{int(end_time_difference.total_seconds() * 1000)}?types=stoppage"
+	headers = {
+	  'vendor-access-token': connector_doc.get_password("vendor_access_token")
+	}
+	response = requests.request("GET", url, headers=headers)
+	if response.ok:
+		response=response.json().get('result')
+		reqd_data=[]
+		if vehicle_no:
+			for row in response.get('logs'):
+				if row.get('vehicle_plate') in vehicle_no:
+					if stoppage_duration:
+						if row.get('duration')/60 > stoppage_duration:
+							reqd_data.append(row)
+					else:
+						reqd_data.append(row)
+		else:
+			for row in response.get('logs'):
+				if stoppage_duration:
+					if row.get('duration')/60 > stoppage_duration:
+						reqd_data.append(row)
+				else:
+					reqd_data.append(row)
+		return reqd_data
+	else:
+		response.raise_for_status()
