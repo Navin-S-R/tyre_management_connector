@@ -177,7 +177,8 @@ def find_stopped_vehicles(threshold_minutes=20,get_location=False):
 				if standing_duration >= (threshold_minutes * 60):
 					data = {
 						"vehicle_no": vehicle_no,
-						"last_update_time": current_latest_data['erp_time_stamp']
+						"last_update_time": current_latest_data['erp_time_stamp'],
+						"geo_location":json.loads(current_latest_data.get('overall_response', '{}')).get('geocode')
 					}
 					if get_location:
 						data["last_location"]=get_location_for_lat_lng(lat=json.loads(current_latest_data.get('overall_response', '{}')).get('geocode').get('lat'),lng=json.loads(current_latest_data.get('overall_response', '{}')).get('geocode').get('lng'))
