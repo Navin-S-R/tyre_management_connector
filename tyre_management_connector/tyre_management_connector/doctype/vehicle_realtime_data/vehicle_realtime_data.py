@@ -186,12 +186,13 @@ def find_stopped_vehicles(threshold_minutes=20,get_location=False):
 	return stopped_vehicles
 
 def get_location_for_lat_lng(lat, lng):
-	url = f"https://geocode.maps.co/reverse?lat={lat}&lon={lng}"
+	url = f"https://nominatim.openstreetmap.org/reverse?lat={lat}&lon={lng}&format=json"
 	response = requests.request("GET", url, headers={}, data={})
+	print(response)
 	if response.ok:
 		response=response.json()
+		print(response)
 		response.pop('licence')
-		response.pop('powered_by')
 		response.pop('osm_type')
 		response.pop('osm_id')
 		return response
