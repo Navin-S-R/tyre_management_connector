@@ -70,7 +70,7 @@ def get_vehicle_idling_log(start_time=None,end_time=None,vehicle_no=None):
 	end_time_obj = datetime.strptime(end_time, "%Y-%m-%d %H:%M:%S")
 	end_time_difference = end_time_obj - epoch
 
-	url = f"https://indium-apis.intangles.io/api/v1/vendor/alert_logs/{connector_doc.account_id}/list/{int(start_time_difference.total_seconds() * 1000)}/{int(end_time_difference.total_seconds() * 1000)}?types=idling"
+	url = f"{connector_doc.url}/api/v1/vendor/alert_logs/{connector_doc.account_id}/list/{int(start_time_difference.total_seconds() * 1000)}/{int(end_time_difference.total_seconds() * 1000)}?types=idling"
 	headers = {
 	  'vendor-access-token': connector_doc.get_password("vendor_access_token")
 	}
@@ -110,7 +110,7 @@ def get_vehicle_stoppage_log(start_time=None,end_time=None,vehicle_no=None,stopp
 	end_time_obj = datetime.strptime(end_time, "%Y-%m-%d %H:%M:%S")
 	end_time_difference = end_time_obj - epoch
 
-	url = f"https://indium-apis.intangles.io/api/v1/vendor/alert_logs/{connector_doc.account_id}/list/{int(start_time_difference.total_seconds() * 1000)}/{int(end_time_difference.total_seconds() * 1000)}?types=stoppage"
+	url = f"{connector_doc.url}/api/v1/vendor/alert_logs/{connector_doc.account_id}/list/{int(start_time_difference.total_seconds() * 1000)}/{int(end_time_difference.total_seconds() * 1000)}?types=stoppage"
 	headers = {
 	  'vendor-access-token': connector_doc.get_password("vendor_access_token")
 	}
