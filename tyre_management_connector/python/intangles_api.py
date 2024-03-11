@@ -159,6 +159,7 @@ def get_intangles_fuel_log(start_time=None,end_time=None):
 		end_time=epoch_end_time
 	)
 	while result.get('last_evaluated_timestamp'):
+		print(result.get('last_evaluated_timestamp'))
 		result=fuel_alert_log(
 			start_time=epoch_start_time,
 			end_time=epoch_end_time,
@@ -168,7 +169,7 @@ def get_intangles_fuel_log(start_time=None,end_time=None):
 def fuel_alert_log(start_time=None, end_time=None, last_evaluated_timestamp=None):
 	connector_doc=frappe.get_single("Intangles Connector")
 	if last_evaluated_timestamp:
-		evaluated_timestamp = f"/{last_evaluated_timestamp}"
+		evaluated_timestamp = f"?last_evaluated_timestamp={last_evaluated_timestamp}"
 	else:
 		evaluated_timestamp=""
 	url = f"{connector_doc.url}/api/v1/vendor/fuel_alert_logs/{connector_doc.account_id}/list/{start_time}/{end_time}{evaluated_timestamp}"
@@ -176,17 +177,14 @@ def fuel_alert_log(start_time=None, end_time=None, last_evaluated_timestamp=None
 	  'vendor-access-token': connector_doc.get_password("vendor_access_token")
 	}
 	response = requests.request("GET", url, headers=headers)
-	if response.ok:
+	result={}
+	if response.ok and response.status_code==200:
 		response=response.json().get('result')
 		if response.get('logs'):
 			post_fuel_logs(logs=response.get('logs'))
 		if response.get('paging',{}).get('isLastPage') == False:
-			result={
-				'last_evaluated_timestamp':response.get('paging',{}).get('lastEvaluatedTimestamp')
-			}
-			return result
-	else:
-		response.raise_for_status()
+			result['last_evaluated_timestamp']=response.get('paging',{}).get('lastEvaluatedTimestamp')
+	return result
 
 def post_fuel_logs(logs):
 	frappe.log_error(message=logs, title=_("Fuel logs"))
