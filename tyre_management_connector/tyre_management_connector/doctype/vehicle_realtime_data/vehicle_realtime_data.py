@@ -88,9 +88,13 @@ def get_intangles_vehicle_data_bulk(filters=None):
 	results = list(cursor)
 	client_server.close()
 	final_data={}
+	print(results)
 	for result in results:
 		final_data[result.get('_id')] = json.loads(result.get('latest_data').get('overall_response'))
-		final_data[result.get('_id')]["location_details"] = get_location_for_lat_lng(lat=json.loads(result.get('latest_data').get('overall_response')).get('geocode').get('lat'),lng=json.loads(result.get('latest_data').get('overall_response')).get('geocode').get('lng'))
+		try:
+			final_data[result.get('_id')]["location_details"] = get_location_for_lat_lng(lat=json.loads(result.get('latest_data').get('overall_response')).get('geocode').get('lat'),lng=json.loads(result.get('latest_data').get('overall_response')).get('geocode').get('lng')) or {}
+		except:
+			final_data[result.get('_id')]["location_details"] = {}
 	return final_data
 
 #Delete data
