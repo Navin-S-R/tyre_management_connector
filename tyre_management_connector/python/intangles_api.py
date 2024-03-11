@@ -187,4 +187,27 @@ def fuel_alert_log(start_time=None, end_time=None, last_evaluated_timestamp=None
 	return result
 
 def post_fuel_logs(logs):
-	frappe.log_error(message=logs, title=_("Fuel logs"))
+	for log in logs:
+		url = "http://desk_lnder:8000/api/resource/Intangle Fuel Logs"
+		payload = json.dumps({
+		  "intangles_id": log.get('id'),
+		  "latitude": log.get('location',{}).get('latitude'),
+		  "longitude": log.get('location',{}).get('longitude'),
+		  "vehicle_id": log.get('vehicle_id'),
+		  "account_id": log.get('account_id'),
+		  "vehicle_plate": log.get('vehicle_plate'),
+		  "address": log.get('address'),
+		  "type": log.get('type'),
+		  "volume": log.get('amount')  ,
+		  "start_level_mileage": log.get('start_level_mileage'),
+		  "start_odo": log.get('odo'),
+		  "end_odo": log.get('end_odo'),
+		  "start_level": log.get('start_level'),
+		  "end_level": log.get('end_level'),
+		  "overall_response": json.dumps(log)
+		})
+		headers = {
+		  'Authorization': 'token 5d86d079564a18a:80e46996b1b9eaf',
+		  'Content-Type': 'application/json'
+		}
+		response = requests.request("POST", url, headers=headers, data=payload)
