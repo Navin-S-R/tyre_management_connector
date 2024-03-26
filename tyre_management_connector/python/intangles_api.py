@@ -51,6 +51,17 @@ def update_odometer_value():
 	else:
 		frappe.log_error(response.raise_for_status())
 
+#get epoch datetime
+@frappe.whitelist()
+def get_epoch_datetime(date):
+	epoch = datetime(1970, 1, 1)
+	if isinstance(date, datetime):
+		date_str = date.strftime("%Y-%m-%d %H:%M:%S")
+	else:
+		date_str = date
+	date_object=datetime.strptime(date_str, "%Y-%m-%d %H:%M:%S")
+	time_difference = date_object - epoch
+	return int(time_difference.total_seconds() * 1000)
 #Get vehicle idling Log
 def get_vehicle_idling_log(start_time=None,end_time=None,vehicle_no=None):
 	"""
@@ -166,8 +177,21 @@ def get_intangles_fuel_log(start_time=None,end_time=None):
 			last_evaluated_timestamp=result.get('last_evaluated_timestamp')
 		)
 
+def pull_fuel_alert_logs():
+	from datetime import timedelta ,datetime
+	to_date_obj = datetime.now()
+	from_date_obj = datetime.now()- timedelta(days=2)
+	fuel_alert_log(start_time=from_date_obj,end_time=to_date_obj)
+
 def fuel_alert_log(start_time=None, end_time=None, last_evaluated_timestamp=None):
 	connector_doc=frappe.get_single("Intangles Connector")
+	if not start_time and not end_time:
+		time_obj = datetime.now()
+		start_time = time_obj.strftime("%Y-%m-%d 00:00:00")
+		end_time = time_obj.strftime("%Y-%m-%d %H:%M:%S")
+
+	start_time = get_epoch_datetime(start_time)
+	end_time = get_epoch_datetime(end_time)
 	if last_evaluated_timestamp:
 		evaluated_timestamp = f"?last_evaluated_timestamp={last_evaluated_timestamp}"
 	else:
@@ -216,3 +240,98 @@ def post_fuel_logs(logs):
 			print(response)
 		except:
 			pass
+
+
+@frappe.whitelist()
+def get_vehicle_details_intangles(vehicle_no=None):
+	connector_doc=frappe.get_single("Intangles Connector")
+	url = f"{connector_doc.url}/api/v1/vendor/vehicle/list/?account_id={connector_doc.account_id}&no_deleted=true"
+
+	payload = {}
+	headers = {
+	  'vendor-access-token': connector_doc.get_password("vendor_access_token")
+	}
+
+	response = requests.request("GET", url, headers=headers, data=payload)
+	if response.ok:
+		response=response.json().get('result')
+		reqd_data=[]
+		if vehicle_no and isinstance(vehicle_no,list):
+			for row in response.get('vehicles'):
+				if row.get('plate') in vehicle_no:
+					reqd_data.append(row)
+		elif vehicle_no:
+			return "Vehicle parameter must be a list"
+		else:
+			for row in response.get('vehicles'):
+				reqd_data.append(row)
+		return reqd_data
+	else:
+		response.raise_for_status()
+
+
+@frappe.whitelist()
+def get_fuel_alertlogs(start_time=None,end_time=None,vehicle_no=None,alert_type=None):
+	"""
+		alert_type = [
+			over_speed,
+			idling,
+			hard_brake,
+			stoppage,
+			freerun,
+			unscheduled_driving,
+			over_acc,
+			fuel_bhara,
+			fuel_chori,
+			def_bhara,
+			def_chori,
+			device_disconnected,
+			device_connected
+		]
+	"""
+	if not alert_type:
+		alert_type = [
+			"over_speed",
+			"idling",
+			"hard_brake",
+			"stoppage",
+			"freerun",
+			"unscheduled_driving",
+			"over_acc",
+			"fuel_bhara",
+			"fuel_chori",
+			"def_bhara",
+			"def_chori",
+			"device_disconnected",
+			"device_connected"
+		]
+	type_list=",".join(list(set(alert_type)))
+	connector_doc=frappe.get_single("Intangles Connector")
+	if not start_time and not end_time:
+		time_obj = datetime.now()
+		start_time = time_obj.strftime("%Y-%m-%d 00:00:00")
+		end_time = time_obj.strftime("%Y-%m-%d %H:%M:%S")
+
+	start_time = get_epoch_datetime(start_time)
+	end_time = get_epoch_datetime(end_time)
+
+	url = f"{connector_doc.url}/api/v1/vendor/alert_logs/{connector_doc.account_id}/list/{start_time}/{end_time}?types={type_list}"
+	headers = {
+	  'vendor-access-token': connector_doc.get_password("vendor_access_token")
+	}
+	response = requests.request("GET", url, headers=headers)
+	if response.ok:
+		response=response.json().get('result')
+		reqd_data=[]
+		if vehicle_no and isinstance(vehicle_no,list):
+			for row in response.get('logs'):
+				if row.get('vehicle_plate') in vehicle_no:
+					reqd_data.append(row)
+		elif vehicle_no:
+			return "Vehicle parameter must be a list"
+		else:
+			for row in response.get('vehicles'):
+				reqd_data.append(row)
+		return reqd_data
+	else:
+		response.raise_for_status()

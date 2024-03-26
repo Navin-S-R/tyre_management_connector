@@ -122,7 +122,8 @@ scheduler_events = {
 		"tyre_management_connector.tyre_management_connector.doctype.vehicle_realtime_data.vehicle_realtime_data.delete_old_intangles_vehicle_data"
 	],
 	"hourly": [
-		"tyre_management_connector.python.intangles_api.update_odometer_value"
+		"tyre_management_connector.python.intangles_api.update_odometer_value",
+		"tyre_management_connector.python.intangles_api.pull_fuel_alert_logs"
 	]
 #	"weekly": [
 #		"tyre_management_connector.tasks.weekly"
