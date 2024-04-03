@@ -157,31 +157,23 @@ def get_intangles_fuel_log(start_time=None,end_time=None):
 		start_time = time_obj.strftime("%Y-%m-%d 00:00:00")
 		end_time = time_obj.strftime("%Y-%m-%d %H:%M:%S")
 
-	epoch = datetime(1970, 1, 1)
-	start_time_obj = datetime.strptime(start_time, "%Y-%m-%d %H:%M:%S")
-	start_time_difference = start_time_obj - epoch
-	epoch_start_time=int(start_time_difference.total_seconds() * 1000)
-
-	end_time_obj = datetime.strptime(end_time, "%Y-%m-%d %H:%M:%S")
-	end_time_difference = end_time_obj - epoch
-	epoch_end_time=int(end_time_difference.total_seconds() * 1000)
 	result=fuel_alert_log(
-		start_time=epoch_start_time,
-		end_time=epoch_end_time
+		start_time=start_time,
+		end_time=end_time
 	)
 	while result.get('last_evaluated_timestamp'):
 		print(result.get('last_evaluated_timestamp'))
 		result=fuel_alert_log(
-			start_time=epoch_start_time,
-			end_time=epoch_end_time,
+			start_time=start_time,
+			end_time=end_time,
 			last_evaluated_timestamp=result.get('last_evaluated_timestamp')
 		)
 
 def pull_fuel_alert_logs():
 	from datetime import timedelta ,datetime
 	to_date_obj = datetime.now()
-	from_date_obj = datetime.now()- timedelta(days=2)
-	fuel_alert_log(start_time=from_date_obj,end_time=to_date_obj)
+	from_date_obj = datetime.now()- timedelta(days=7)
+	get_intangles_fuel_log(start_time=from_date_obj,end_time=to_date_obj)
 
 def fuel_alert_log(start_time=None, end_time=None, last_evaluated_timestamp=None):
 	connector_doc=frappe.get_single("Intangles Connector")
@@ -189,7 +181,7 @@ def fuel_alert_log(start_time=None, end_time=None, last_evaluated_timestamp=None
 		time_obj = datetime.now()
 		start_time = time_obj.strftime("%Y-%m-%d 00:00:00")
 		end_time = time_obj.strftime("%Y-%m-%d %H:%M:%S")
-
+	
 	start_time = get_epoch_datetime(start_time)
 	end_time = get_epoch_datetime(end_time)
 	if last_evaluated_timestamp:
