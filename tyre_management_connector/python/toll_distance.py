@@ -10,14 +10,13 @@ def mongo_db_connect():
 	db = client.get_database()
 	return client, db
 
-def create_records(client,db,data):
+def create_records(data):
+	client, db = mongo_db_connect()
 	my_collection = db["toll_distance_data"]
-	data_to_insert = data
-	my_collection.insert_one(data_to_insert)
+	my_collection.insert_one(data)
 	client.close()
 
 def get_toll_distance():
-	client, db = mongo_db_connect()
 	toll_list=[
 		{
 			"from_lng" : 80.1997,
@@ -33,7 +32,6 @@ def get_toll_distance():
 		}
 	]
 	for row in toll_list:
-		print(row)
 		if res := get_location_distance(from_lng=row.get('from_lng'),from_lat=row.get('from_lat'),to_lng=row.get('to_lng'),to_lat=row.get('to_lat')):
 			res['processed_lat_lng']={
 				"from":{
@@ -45,12 +43,13 @@ def get_toll_distance():
 					"lng" : row.get('to_lng')
 				}
 			}
-			create_records(client=client, db=db, data=json.dumps(res))
+			res['erp_time_stamp']=frappe.utils.now()
+			create_records(data=res)
 
 def get_location_distance(from_lng,from_lat,to_lng,to_lat):
 	url = f"http://router.project-osrm.org/route/v1/driving/{from_lng},{from_lat};{to_lng},{to_lat}?alternatives=true&steps=false&overview=simplified&annotations=false"
 	response = requests.request("GET", url).json()
-	if response.get('code')==200:
+	if response.get('code') in ["200",200,"ok","OK","Ok"]:
 		return response
 
 #Get Toll Results
@@ -58,7 +57,8 @@ def get_location_distance(from_lng,from_lat,to_lng,to_lat):
 def get_toll_distance_bulk(filters=None):
 	client, db = mongo_db_connect()
 	collection = db['toll_distance_data']
-	cursor = collection.aggregate()
+	# Use find() to retrieve all documents
+	cursor = collection.find({})
 	results = list(cursor)
 	print(results)
 	client.close()
