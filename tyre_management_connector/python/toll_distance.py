@@ -46,7 +46,7 @@ def get_toll_distance():
 			}
 			create_records(client=client, db=db, data=json.dumps(res))
 
-def get_location_distance():
+def get_location_distance(from_lng,from_lat,to_lng,to_lat):
 	url = "http://router.project-osrm.org/route/v1/driving/{from_lng},{from_lat};{to_lng},{to_lat}?alternatives=true&steps=false&overview=simplified&annotations=false"
 	response = requests.request("GET", url).json()
 	if response.get('code'):
