@@ -23,16 +23,17 @@ def get_toll_distance():
 			"from_lng" : 80.1997,
 			"from_lat" : 13.0741,
 			"to_lng" : 76.9696,
-			"from_lat" : 11.0167
+			"to_lat" : 11.0167
 		},
 		{
 			"from_lng" : 80.1997,
 			"from_lat" : 13.0741,
 			"to_lng" : 76.9696,
-			"from_lat" : 11.0167
+			"to_lat" : 11.0167
 		}
 	]
 	for row in toll_list:
+		print(row)
 		if res := get_location_distance(from_lng=row.get('from_lng'),from_lat=row.get('from_lat'),to_lng=row.get('to_lng'),to_lat=row.get('to_lat')):
 			res['processed_lat_lng']={
 				"from":{
@@ -47,15 +48,14 @@ def get_toll_distance():
 			create_records(client=client, db=db, data=json.dumps(res))
 
 def get_location_distance(from_lng,from_lat,to_lng,to_lat):
-	url = "http://router.project-osrm.org/route/v1/driving/{from_lng},{from_lat};{to_lng},{to_lat}?alternatives=true&steps=false&overview=simplified&annotations=false"
+	url = f"http://router.project-osrm.org/route/v1/driving/{from_lng},{from_lat};{to_lng},{to_lat}?alternatives=true&steps=false&overview=simplified&annotations=false"
 	response = requests.request("GET", url).json()
-	if response.get('code'):
+	if response.get('code')==200:
 		return response
-	
 
 #Get Toll Results
 @frappe.whitelist()
-def get_smart_tyre_data_bulk(filters=None):
+def get_toll_distance_bulk(filters=None):
 	client, db = mongo_db_connect()
 	collection = db['toll_distance_data']
 	cursor = collection.aggregate()
