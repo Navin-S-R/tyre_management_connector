@@ -43,6 +43,8 @@ class SmartTyreRealtimeData(Document):
 
 @frappe.whitelist()
 def pull_realtime_data(**args):
+	#FIXME
+	return {"response" : "Success"}
 	if isinstance(args, str):
 		args = json.loads(args)
 	args.pop('cmd')
