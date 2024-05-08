@@ -16,35 +16,41 @@ def create_records(data):
 	my_collection.insert_one(data)
 	client.close()
 
-def get_toll_distance():
-	toll_list=[
-		{
-			"from_lng" : 80.1997,
-			"from_lat" : 13.0741,
-			"to_lng" : 76.9696,
-			"to_lat" : 11.0167
-		},
-		{
-			"from_lng" : 80.1997,
-			"from_lat" : 13.0741,
-			"to_lng" : 76.9696,
-			"to_lat" : 11.0167
-		}
-	]
-	for row in toll_list:
-		if res := get_location_distance(from_lng=row.get('from_lng'),from_lat=row.get('from_lat'),to_lng=row.get('to_lng'),to_lat=row.get('to_lat')):
-			res['processed_lat_lng']={
-				"from":{
-					"lat" : row.get('from_lat'),
-					"lng" : row.get('from_lng')
-				},
-				"to":{
-					"lat" : row.get('to_lat'),
-					"lng" : row.get('to_lng')
-				}
+def toll_details_from_file():
+	import pandas as pd
+	df = pd.read_excel(f"/home/navin/Downloads/firefox_downloads/Toll-Details updated.xlsx")
+	for _1, row_a in df.iterrows():
+		print(_1)
+		if row_a.get('actual_latitude') and row_a.get('actual_longitude'):
+			for _2, row_b in df.iterrows():
+				if row_b.get('actual_latitude') and row_b.get('actual_longitude'):
+					if row_a.get('tollplaza_id') !=  row_b.get('tollplaza_id'):
+						get_toll_distance(
+							from_lng=row_a.get('actual_longitude'),
+							from_lat=row_a.get('actual_latitude'),
+							to_lng=row_b.get('actual_longitude'),
+							to_lat=row_b.get('actual_latitude')
+						)
+
+def get_toll_distance(from_lng,from_lat,to_lng,to_lat):
+	if res := get_location_distance(
+			from_lng=from_lng,
+			from_lat=from_lat,
+			to_lng=to_lng,
+			to_lat=to_lat
+		):
+		res['processed_lat_lng']={
+			"from":{
+				"lat" : from_lat,
+				"lng" : from_lng
+			},
+			"to":{
+				"lat" : to_lat,
+				"lng" : to_lng
 			}
-			res['erp_time_stamp']=frappe.utils.now()
-			create_records(data=res)
+		}
+		res['erp_time_stamp']=frappe.utils.now()
+		create_records(data=res)
 
 def get_location_distance(from_lng,from_lat,to_lng,to_lat):
 	url = f"http://router.project-osrm.org/route/v1/driving/{from_lng},{from_lat};{to_lng},{to_lat}?alternatives=true&steps=false&overview=simplified&annotations=false"
