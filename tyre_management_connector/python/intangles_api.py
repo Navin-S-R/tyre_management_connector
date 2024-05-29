@@ -174,6 +174,7 @@ def pull_fuel_alert_logs():
 	to_date_obj = datetime.now()
 	from_date_obj = datetime.now()- timedelta(days=7)
 	get_intangles_fuel_log(start_time=from_date_obj,end_time=to_date_obj)
+	get_intangles_alert_log(start_time=from_date_obj,end_time=to_date_obj)
 
 def fuel_alert_log(start_time=None, end_time=None, last_evaluated_timestamp=None):
 	connector_doc=frappe.get_single("Intangles Connector")
