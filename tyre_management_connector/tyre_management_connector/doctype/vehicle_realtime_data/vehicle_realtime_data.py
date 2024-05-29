@@ -42,8 +42,6 @@ class VehicleRealtimeData(Document):
 import frappe
 @frappe.whitelist()
 def pull_realtime_data(**args):
-	#FIXME
-	return {"response" : "Success"}
 	if isinstance(args, str):
 		args = json.loads(args)
 	erp_time_stamp = frappe.utils.now()

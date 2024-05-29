@@ -282,7 +282,7 @@ def get_intangles_alert_log(start_time=None,end_time=None):
 		)
 
 @frappe.whitelist()
-def get_alertlogs(start_time=None,end_time=None,vehicle_no=None,alert_type=None):
+def get_alertlogs(start_time=None,end_time=None,vehicle_no=None,alert_type=None,last_evaluated_timestamp=None):
 	"""
 		alert_type = [
 			over_speed,
@@ -326,7 +326,11 @@ def get_alertlogs(start_time=None,end_time=None,vehicle_no=None,alert_type=None)
 	start_time = get_epoch_datetime(start_time)
 	end_time = get_epoch_datetime(end_time)
 
-	url = f"{connector_doc.url}/api/v1/vendor/alert_logs/{connector_doc.account_id}/list/{start_time}/{end_time}?types={type_list}"
+	if last_evaluated_timestamp:
+		evaluated_timestamp = f"&last_evaluated_timestamp={last_evaluated_timestamp}"
+	else:
+		evaluated_timestamp=""
+	url = f"{connector_doc.url}/api/v1/vendor/alert_logs/{connector_doc.account_id}/list/{start_time}/{end_time}?types={type_list}{evaluated_timestamp}"
 	headers = {
 	  'vendor-access-token': connector_doc.get_password("vendor_access_token")
 	}
