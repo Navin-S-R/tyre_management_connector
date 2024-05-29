@@ -269,19 +269,20 @@ def get_intangles_alert_log(start_time=None,end_time=None):
 		start_time = time_obj.strftime("%Y-%m-%d 00:00:00")
 		end_time = time_obj.strftime("%Y-%m-%d %H:%M:%S")
 
-	result=get_fuel_alertlogs(
+	result=get_alertlogs(
 		start_time=start_time,
 		end_time=end_time
 	)
+	print(result)
 	while result.get('last_evaluated_timestamp'):
-		result=get_fuel_alertlogs(
+		result=get_alertlogs(
 			start_time=start_time,
 			end_time=end_time,
 			last_evaluated_timestamp=result.get('last_evaluated_timestamp')
 		)
 
 @frappe.whitelist()
-def get_fuel_alertlogs(start_time=None,end_time=None,vehicle_no=None,alert_type=None):
+def get_alertlogs(start_time=None,end_time=None,vehicle_no=None,alert_type=None):
 	"""
 		alert_type = [
 			over_speed,
@@ -338,13 +339,14 @@ def get_fuel_alertlogs(start_time=None,end_time=None,vehicle_no=None,alert_type=
 				if row.get('vehicle_plate') in vehicle_no:
 					post_alert_logs(logs=row)
 		elif not vehicle_no:
-			for row in response.get('vehicles'):
+			for row in response.get('logs'):
 				post_alert_logs(logs=row)
 		if response.get('paging',{}).get('isLastPage') == False:
 			result['last_evaluated_timestamp']=response.get('paging',{}).get('lastEvaluatedTimestamp')
 			return result
 	else:
 		response.raise_for_status()
+		return result
 
 def post_alert_logs(logs):
 	url = "https://desk.lnder.in/api/resource/Intangles Vehicle Alert Log"
