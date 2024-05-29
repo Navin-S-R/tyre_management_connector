@@ -261,6 +261,24 @@ def get_vehicle_details_intangles(vehicle_no=None):
 	else:
 		response.raise_for_status()
 
+@frappe.whitelist()
+def get_intangles_alert_log(start_time=None,end_time=None):
+
+	if not start_time and not end_time:
+		time_obj = datetime.now()
+		start_time = time_obj.strftime("%Y-%m-%d 00:00:00")
+		end_time = time_obj.strftime("%Y-%m-%d %H:%M:%S")
+
+	result=get_fuel_alertlogs(
+		start_time=start_time,
+		end_time=end_time
+	)
+	while result.get('last_evaluated_timestamp'):
+		result=get_fuel_alertlogs(
+			start_time=start_time,
+			end_time=end_time,
+			last_evaluated_timestamp=result.get('last_evaluated_timestamp')
+		)
 
 @frappe.whitelist()
 def get_fuel_alertlogs(start_time=None,end_time=None,vehicle_no=None,alert_type=None):
@@ -312,18 +330,42 @@ def get_fuel_alertlogs(start_time=None,end_time=None,vehicle_no=None,alert_type=
 	  'vendor-access-token': connector_doc.get_password("vendor_access_token")
 	}
 	response = requests.request("GET", url, headers=headers)
+	result={}
 	if response.ok:
 		response=response.json().get('result')
-		reqd_data=[]
 		if vehicle_no and isinstance(vehicle_no,list):
 			for row in response.get('logs'):
 				if row.get('vehicle_plate') in vehicle_no:
-					reqd_data.append(row)
-		elif vehicle_no:
-			return "Vehicle parameter must be a list"
-		else:
+					post_alert_logs(logs=row)
+		elif not vehicle_no:
 			for row in response.get('vehicles'):
-				reqd_data.append(row)
-		return reqd_data
+				post_alert_logs(logs=row)
+		if response.get('paging',{}).get('isLastPage') == False:
+			result['last_evaluated_timestamp']=response.get('paging',{}).get('lastEvaluatedTimestamp')
+			return result
 	else:
 		response.raise_for_status()
+
+def post_alert_logs(logs):
+	url = "https://desk.lnder.in/api/resource/Intangles Vehicle Alert Log"
+	for log in logs:
+		try:
+			payload = json.dumps({
+			  "id": log.get('id'),
+			  "latitude": log.get('location',{}).get('latitude'),
+			  "longitude": log.get('location',{}).get('longitude'),
+			  "vehicle_id": log.get('vehicle_id'),
+			  "account_id": log.get('account_id'),
+			  "vehicle_plate": log.get('vehicle_plate'),
+			  "address": log.get('address'),
+			  "type": log.get('type'),
+			  "overall_response": json.dumps(log)
+			})
+			headers = {
+			  'Authorization': 'token 5d86d079564a18a:80e46996b1b9eaf',
+			  'Content-Type': 'application/json'
+			}
+			response = requests.request("POST", url, headers=headers, data=payload)
+			print(response)
+		except:
+			pass
