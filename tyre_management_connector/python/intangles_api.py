@@ -273,13 +273,15 @@ def get_intangles_alert_log(start_time=None,end_time=None):
 		start_time=start_time,
 		end_time=end_time
 	)
-	print(result)
+	print(result,type(result),result.get('last_evaluated_timestamp'))
 	while result.get('last_evaluated_timestamp'):
+		last_evaluated_timestamp=result.get('last_evaluated_timestamp')
 		result=get_alertlogs(
 			start_time=start_time,
 			end_time=end_time,
-			last_evaluated_timestamp=result.get('last_evaluated_timestamp')
+			last_evaluated_timestamp=last_evaluated_timestamp
 		)
+		print(result)
 
 @frappe.whitelist()
 def get_alertlogs(start_time=None,end_time=None,vehicle_no=None,alert_type=None,last_evaluated_timestamp=None):
@@ -336,28 +338,32 @@ def get_alertlogs(start_time=None,end_time=None,vehicle_no=None,alert_type=None,
 	}
 	response = requests.request("GET", url, headers=headers)
 	result={}
+	reqd_data=[]
 	if response.ok:
 		response=response.json().get('result')
 		if vehicle_no and isinstance(vehicle_no,list):
 			for row in response.get('logs'):
 				if row.get('vehicle_plate') in vehicle_no:
-					post_alert_logs(logs=row)
+					reqd_data.append(row)
 		elif not vehicle_no:
 			for row in response.get('logs'):
-				post_alert_logs(logs=row)
+				reqd_data.append(row)
 		if response.get('paging',{}).get('isLastPage') == False:
 			result['last_evaluated_timestamp']=response.get('paging',{}).get('lastEvaluatedTimestamp')
-			return result
+		post_alert_logs(logs=reqd_data)
+		return result
 	else:
 		response.raise_for_status()
 		return result
 
 def post_alert_logs(logs):
+	from datetime import datetime
 	url = "https://desk.lnder.in/api/resource/Intangles Vehicle Alert Log"
 	for log in logs:
 		try:
 			payload = json.dumps({
 			  "id": log.get('id'),
+			  "timestamp": datetime.fromtimestamp(log.get('timestamp')/ 1000).strftime('%Y-%m-%d %H:%M:%S'),
 			  "latitude": log.get('location',{}).get('latitude'),
 			  "longitude": log.get('location',{}).get('longitude'),
 			  "vehicle_id": log.get('vehicle_id'),
@@ -365,7 +371,7 @@ def post_alert_logs(logs):
 			  "vehicle_plate": log.get('vehicle_plate'),
 			  "address": log.get('address'),
 			  "type": log.get('type'),
-			  "overall_response": json.dumps(log)
+			  "overall_response": json.dumps(log,indent=4)
 			})
 			headers = {
 			  'Authorization': 'token 5d86d079564a18a:80e46996b1b9eaf',
@@ -373,5 +379,6 @@ def post_alert_logs(logs):
 			}
 			response = requests.request("POST", url, headers=headers, data=payload)
 			print(response)
-		except:
+		except Exception as e:
+			print(e)
 			pass
